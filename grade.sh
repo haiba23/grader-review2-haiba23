@@ -24,10 +24,10 @@ else
     exit
 fi
 
-cp student-submission/ListExamples.java TestListExamples.java GradeServer.java Server.java grading-area
+cp -r student-submission/ListExamples.java TestListExamples.java GradeServer.java Server.java lib grading-area
 
 javac -cp $CPATH grading-area/*.java
-if [[ $? -eq 126 ]]
+if [[ $? -ne 0 ]]
 then
     echo "Files did not compile"
     exit
@@ -35,10 +35,17 @@ else
     echo "Files successfully compiled"
 fi
 
-java -cp $CPATH org.junit.runner.JUnitCore grading-area/TestListExamples.java > grading-area/test-results.txt
-tests_total=`grep -oP "Tests run: \K\d+" grading-area/test-results.txt`
-tests_failed=`grep -oP "Failures: \K\d+" grading-area/test-results.txt`
-tests_passed=$(($tests_total - $tests_failed));
-echo "$tests_passed tests passed out of $tests_total"
-grade=$(($tests_passed/$tests_total))
-echo "Grade: $grade"
+cd grading-area
+java -cp $CPATH org.junit.runner.JUnitCore TestListExamples > test-results.txt
+tests_total=`grep -oP "Tests run: \K\d+" test-results.txt`
+tests_failed=`grep -oP "Failures: \K\d+" test-results.txt`
+tests_passed="$((tests_total-tests_failed))"
+if [[ ${#tests_total} -ne 0 ]]
+then
+    echo "$tests_passed tests passed out of $tests_total"
+    grade=$((tests_passed/tests_total))
+    echo "Grade: $grade"
+else
+    echo "All tests passed"
+    echo "Grade: 100"
+fi

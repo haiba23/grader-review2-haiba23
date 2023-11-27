@@ -1,11 +1,19 @@
 import static org.junit.Assert.*;
 import org.junit.*;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 class IsMoon implements StringChecker {
   public boolean checkString(String s) {
     return s.equalsIgnoreCase("moon");
+  }
+}
+
+class CheckForE implements StringChecker {
+  public boolean checkString(String s) {
+    return s.contains("e");
   }
 }
 
@@ -18,4 +26,12 @@ public class TestListExamples {
     List<String> expected = Arrays.asList("a", "a", "b", "c", "d");
     assertEquals(expected, merged);
   }
+
+  @Test
+  public void testFilter1() {
+    List<String> input = Arrays.asList("hi", "hello", "hey");
+    StringChecker sc = new CheckForE();
+    List<String> expected = Arrays.asList("hello", "hey");
+    assertEquals(expected, ListExamples.filter(input, sc));
+}
 }
