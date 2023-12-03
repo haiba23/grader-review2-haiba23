@@ -1,6 +1,6 @@
-CPATH=".:lib/hamcrest-core-1.3.jar:lib/junit-4.13.2.jar"
+CPATH='.:lib/hamcrest-core-1.3.jar:lib/junit-4.13.2.jar'
 
-rm -rf student-submission
+# rm -rf student-submission
 rm -rf grading-area
 
 mkdir grading-area
@@ -8,44 +8,34 @@ mkdir grading-area
 git clone $1 student-submission
 echo 'Finished cloning'
 
+student_submission="student-submission/ListExamples.java"
+destination_directory="grading-area/"
+
 # Draw a picture/take notes on the directory structure that's set up after
 # getting to this point
-
-# A directory called student-submission is created with the ListExamples.java file inside
 
 # Then, add here code to compile and run, and do any post-processing of the
 # tests
 
-if [[ -f student-submission/ListExamples.java ]]
-then
-    echo "Correct file found"
+if [[ -f $student_submission ]]; then
+    echo "File found!"
+    cp -r "$student_submission" "$destination_directory"
+    cp -r TestListExamples.java "$destination_directory"
 else
-    echo "Correct file not found"
-    exit
+    echo "File not found: $student_submission"
+    ls -R student-submission  # Add this line to list the contents of student-submission
+    exit 1
 fi
 
-cp -r student-submission/ListExamples.java TestListExamples.java GradeServer.java Server.java lib grading-area
-
-javac -cp $CPATH grading-area/*.java
-if [[ $? -ne 0 ]]
-then
-    echo "Files did not compile"
-    exit
-else
-    echo "Files successfully compiled"
-fi
+set +e
 
 cd grading-area
-java -cp $CPATH org.junit.runner.JUnitCore TestListExamples > test-results.txt
-tests_total=`grep -oP "Tests run: \K\d+" test-results.txt`
-tests_failed=`grep -oP "Failures: \K\d+" test-results.txt`
-tests_passed="$((tests_total-tests_failed))"
-if [[ ${#tests_total} -ne 0 ]]
-then
-    echo "$tests_passed tests passed out of $tests_total"
-    grade=$((tests_passed/tests_total))
-    echo "Grade: $grade"
-else
-    echo "All tests passed"
-    echo "Grade: 100"
+
+javac -cp .:lib/hamcrest-core-1.3.jar:lib/junit-4.13.2.jar *.java
+java -cp .:lib/hamcrest-core-1.3.jar:lib/junit-4.13.2.jar org.junit.runner.JUnitCore TestListExamples
+
+
+if [ $? -ne 0 ]; then
+    echo "Tests compilation failed."
+    exit 1
 fi
